@@ -1,0 +1,3 @@
+[submodule "tools/settings-py"]
+	path = tools/settings-py
+	url = https://github.com/sky-laboratory/settings-py
