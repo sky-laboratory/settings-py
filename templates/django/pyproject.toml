@@ -1,0 +1,231 @@
+# =============================================================================
+# CollabOps settings-py: Django Stack Template
+# =============================================================================
+# 이 파일은 중앙 템플릿 레포(settings-py)에서 관리됩니다.
+# 서비스 레포에서는 이 파일을 기반으로 최소한의 오버라이드만 수행하세요.
+# =============================================================================
+
+[project]
+name = "your-service-name"
+version = "0.1.0"
+description = "Service description"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Your Team", email = "team@example.com" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+]
+
+# -----------------------------------------------------------------------------
+# Core Dependencies (모든 환경 공통)
+# -----------------------------------------------------------------------------
+dependencies = [
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+]
+
+# -----------------------------------------------------------------------------
+# Dependency Groups (uv group 기반 환경별 분리)
+# -----------------------------------------------------------------------------
+[dependency-groups]
+local = [
+    "django>=5.0",
+    "django-environ>=0.11.2",
+    "django-cors-headers>=4.3.1",
+    "django-extensions>=3.2.3",
+    "djangorestframework>=3.14.0",
+    "drf-spectacular>=0.27.0",
+    "psycopg[binary]>=3.1.17",
+    "whitenoise>=6.6.0",
+]
+
+qa = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-django>=4.7.0",
+    "pytest-xdist>=3.5.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+    "django-stubs>=4.2.7",
+    "djangorestframework-stubs>=3.14.5",
+    "pre-commit>=3.6.0",
+    "factory-boy>=3.3.0",
+    "faker>=22.0.0",
+]
+
+stage = [
+    "gunicorn>=21.2.0",
+    "prometheus-client>=0.19.0",
+    "django-prometheus>=2.3.1",
+    "opentelemetry-api>=1.22.0",
+    "opentelemetry-sdk>=1.22.0",
+    "opentelemetry-instrumentation-django>=0.43b0",
+]
+
+prod = [
+    "gunicorn>=21.2.0",
+    "prometheus-client>=0.19.0",
+    "django-prometheus>=2.3.1",
+    "opentelemetry-api>=1.22.0",
+    "opentelemetry-sdk>=1.22.0",
+    "opentelemetry-instrumentation-django>=0.43b0",
+    "sentry-sdk[django]>=1.39.0",
+]
+
+# -----------------------------------------------------------------------------
+# Build System
+# -----------------------------------------------------------------------------
+[build-system]
+requires = ["hatchling>=1.21.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+# -----------------------------------------------------------------------------
+# Ruff Configuration
+# -----------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate
+    "PL",     # pylint
+    "RUF",    # Ruff-specific rules
+    "DJ",     # flake8-django
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "PLR0913", # too many arguments
+    "PLR2004", # magic value comparison
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = ["ARG", "PLR2004", "S101"]
+"**/conftest.py" = ["ARG"]
+"**/migrations/**/*" = ["E501", "ARG"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "config", "apps"]
+force-single-line = false
+lines-after-imports = 2
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+
+# -----------------------------------------------------------------------------
+# Pytest Configuration
+# -----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+addopts = [
+    "-ra",
+    "-q",
+    "--strict-markers",
+    "--strict-config",
+    "-p", "no:warnings",
+    "--reuse-db",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "e2e: End-to-end tests",
+    "slow: Slow running tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::django.utils.deprecation.RemovedInDjango60Warning",
+]
+
+# -----------------------------------------------------------------------------
+# Coverage Configuration
+# -----------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+omit = [
+    "*/__init__.py",
+    "*/conftest.py",
+    "*/migrations/*",
+    "*/admin.py",
+    "tests/*",
+    "manage.py",
+    "config/wsgi.py",
+    "config/asgi.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+fail_under = 80
+show_missing = true
+
+# -----------------------------------------------------------------------------
+# MyPy Configuration
+# -----------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+pretty = true
+show_error_codes = true
+plugins = [
+    "mypy_django_plugin.main",
+    "mypy_drf_plugin.main",
+]
+
+[tool.django-stubs]
+django_settings_module = "config.settings.local"
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+strict = false
+
+[[tool.mypy.overrides]]
+module = ["*.migrations.*"]
+ignore_errors = true
